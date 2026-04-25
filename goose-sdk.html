@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Goose SDK — Build on the Agent</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #7ee787; --purple: #d2a8ff;
+    --orange: #ffa657; --red: #ff7b72;
+  }
+  @media screen {
+    html { background: #000; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      color: var(--text); display: flex; flex-direction: column;
+      align-items: center; gap: 40px; padding: 40px 20px;
+    }
+    .slide {
+      width: 1280px; min-height: 720px; max-width: 100%;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 60px 80px; display: flex; flex-direction: column; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .slide-number { position: absolute; bottom: 24px; right: 40px; color: var(--muted); font-size: 0.8rem; }
+    .print-hint {
+      color: var(--muted); font-size: 0.85rem; text-align: center;
+      padding: 12px; border: 1px dashed var(--border); border-radius: 8px; max-width: 600px;
+    }
+  }
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { background: var(--bg); margin: 0; padding: 0; color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
+    .slide {
+      width: 1280px; height: 720px; padding: 60px 80px;
+      display: flex; flex-direction: column; justify-content: center;
+      page-break-after: always; page-break-inside: avoid;
+      background: var(--bg); position: relative; overflow: hidden;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .slide:last-of-type { page-break-after: auto; }
+    .slide-number { position: absolute; bottom: 24px; right: 40px; color: var(--muted); font-size: 0.8rem; }
+    .print-hint { display: none; }
+  }
+  h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.15; margin-bottom: 0.5rem; }
+  h1.gradient {
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  h2 { font-size: 2.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.2rem; line-height: 1.2; }
+  h3 { font-size: 1.2rem; font-weight: 600; color: var(--purple); margin-bottom: 0.5rem; }
+  p, li { font-size: 1.1rem; line-height: 1.6; }
+  .sub { font-size: 1.35rem; color: var(--muted); margin-bottom: 1rem; }
+  .small { font-size: 0.95rem; color: var(--muted); }
+  .big-emoji { font-size: 3rem; margin-bottom: 1rem; }
+  ul, ol { padding-left: 1.5rem; }
+  li { margin: 0.35rem 0; }
+  li strong { color: var(--green); }
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88em;
+    background: rgba(110,118,129,0.15); padding: 0.1em 0.35em; border-radius: 4px;
+  }
+  pre {
+    background: #0d1117; border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem 1.25rem; overflow-x: auto; margin: 0.75rem 0;
+  }
+  pre code { background: none; padding: 0; font-size: 0.8rem; line-height: 1.55; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 0.75rem 0; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin: 0.75rem 0; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.25rem;
+  }
+  .card h3 { margin-bottom: 0.4rem; }
+  .card p, .card li { font-size: 1rem; }
+  .ca { border-left: 3px solid var(--accent); }
+  .cg { border-left: 3px solid var(--green); }
+  .cp { border-left: 3px solid var(--purple); }
+  .co { border-left: 3px solid var(--orange); }
+  .flow {
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    margin: 0.75rem 0; font-size: 1.05rem;
+  }
+  .fs {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.4rem 0.8rem;
+  }
+  .fa { color: var(--muted); font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.95rem; }
+  th, td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--green); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .badge {
+    display: inline-block; font-size: 0.7rem; font-weight: 600;
+    padding: 0.15em 0.5em; border-radius: 12px; text-transform: uppercase;
+  }
+  .bw { background: #1f3a5f; color: #58a6ff; }
+  .bh { background: #1a3a2a; color: #7ee787; }
+  .bs { background: #2d1f3d; color: #d2a8ff; }
+  .diagram-img {
+    max-width: 100%; max-height: 560px; border-radius: 8px;
+    border: 1px solid var(--border); display: block; margin: 0 auto;
+  }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+  .cm { color: var(--muted); } .kw { color: var(--red); } .str { color: #a5d6ff; }
+  .fn { color: var(--purple); } .tp { color: var(--green); } .n { color: #79c0ff; }
+</style>
+</head>
+<body>
+
+<div class="print-hint">
+  💡 PDF export: <strong>⌘P</strong> → "Save as PDF" → check "Background graphics".
+</div>
+
+<!-- ════════════ SLIDE 1: Title ════════════ -->
+<div class="slide">
+  <div class="big-emoji">🦆</div>
+  <h1 class="gradient">The Goose SDK</h1>
+  <p class="sub">Build on the agent, not around it</p>
+  <div style="margin-top: 1.5rem;">
+    <p>Goose is a single compiled binary — agent runtime, model access, tool execution,
+    extensions, sessions — all included.</p>
+    <p style="margin-top: 0.5rem;">The SDK lets you embed it, connect to it, and extend it.
+    Build your experience; let Goose handle the hard parts.</p>
+  </div>
+  <span class="slide-number">1</span>
+</div>
+
+<!-- ════════════ SLIDE 2: Why Build on Goose ════════════ -->
+<div class="slide">
+  <h2>Why Build on the Goose SDK?</h2>
+
+  <div class="grid2">
+    <div class="card co">
+      <h3>🔧 Without It</h3>
+      <ul>
+        <li>Wire up LLM providers (auth, streaming, retries, fallbacks)</li>
+        <li>Build session management, context windows, compaction</li>
+        <li>Implement tool execution, sandboxing, permissions, security</li>
+        <li>Write your own extension/plugin system</li>
+        <li>Handle model switching, cost tracking, cancellation</li>
+      </ul>
+      <p class="small" style="margin-top: 0.5rem;">Months of plumbing before you ship anything.</p>
+    </div>
+    <div class="card cg">
+      <h3>✅ With Goose SDK</h3>
+      <ul>
+        <li><strong>All providers</strong> — Anthropic, OpenAI, Bedrock, Databricks, xAI, Groq, Ollama, llama.cpp…</li>
+        <li><strong>Security</strong> — prompt injection detection, tool permissions, malware checks</li>
+        <li><strong>Context management</strong> — auto-compaction, token counting, cost tracking</li>
+        <li><strong>Extensions</strong> — MCP + rMCP, Skills, Recipes, lifecycle hooks</li>
+        <li><strong>Sub-agents, scheduling, sandboxed execution</strong></li>
+      </ul>
+      <p class="small" style="margin-top: 0.5rem;">Focus on your experience. Goose handles the rest.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 1rem; text-align: center;">
+    <p style="font-size: 1.15rem;">
+      <strong>One compiled binary. Brew, npm, apt, rpm, Docker, or just download it.</strong>
+    </p>
+  </div>
+  <span class="slide-number">2</span>
+</div>
+
+<!-- ════════════ SLIDE 3: Architecture Diagram ════════════ -->
+<div class="slide">
+  <h2>What's Inside the Binary</h2>
+  <img src="diagram.jpg" alt="Goose architecture: frontends, ACP+ protocol, Goose Core (agent loop, sessions, extensions, sub-agents, context), model access, extensions" class="diagram-img">
+  <p class="small" style="text-align: center; margin-top: 0.75rem;">
+    Frontends connect via ACP+ (the protocol). Everything below the protocol layer is handled for you.
+  </p>
+  <span class="slide-number">3</span>
+</div>
+
+<!-- ════════════ SLIDE 4: How It Works ════════════ -->
+<div class="slide">
+  <h2>How It Works</h2>
+
+  <div class="grid3">
+    <div class="card ca">
+      <h3>📦 Distribution</h3>
+      <p style="font-size: 0.95rem;">Single compiled Rust binary. Get it however you want:</p>
+      <ul style="font-size: 0.85rem; margin-top: 0.4rem;">
+        <li><code>brew install block-goose-cli</code></li>
+        <li><code>npm install @aaif/goose-sdk</code></li>
+        <li><code>apt</code> / <code>rpm</code> / <code>.deb</code> / <code>.flatpak</code></li>
+        <li>Docker: <code>ghcr.io/.../goose</code></li>
+        <li>Windows: MSI, NSIS, PowerShell script</li>
+        <li>Curl install script, GitHub Releases</li>
+        <li>Built-in <code>goose update</code></li>
+      </ul>
+    </div>
+    <div class="card cg">
+      <h3>🔌 Connection</h3>
+      <p style="font-size: 0.95rem;">Three transports, same protocol:</p>
+      <ul style="font-size: 0.9rem;">
+        <li><strong>Stdio</strong> — spawn <code>goose acp</code>, pipe JSON</li>
+        <li><strong>WebSocket</strong> — connect to running server</li>
+        <li><strong>HTTP+SSE</strong> — for web services</li>
+      </ul>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">
+        Runs as a daemon, child process, or CLI tool. Your app connects and sends prompts.
+      </p>
+    </div>
+    <div class="card cp">
+      <h3>📡 Protocol: ACP+</h3>
+      <p style="font-size: 0.95rem;">JSON-RPC 2.0. The "+" is Goose's extensions beyond the ACP open standard:</p>
+      <ul style="font-size: 0.9rem;">
+        <li>Provider/model management</li>
+        <li>Extension hot-loading</li>
+        <li>Config & secrets</li>
+        <li>Session export/import</li>
+      </ul>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">
+        ACP+ extensions will be standardised as they prove out.
+      </p>
+    </div>
+  </div>
+
+  <div class="flow" style="margin-top: 1rem; justify-content: center; font-size: 1.1rem;">
+    <span class="fs">Your App</span>
+    <span class="fa">→</span>
+    <span class="fs"><code>GooseClient</code> (TypeScript SDK)</span>
+    <span class="fa">→</span>
+    <span class="fs">ACP+ (JSON-RPC)</span>
+    <span class="fa">→</span>
+    <span class="fs"><code>goose</code> binary</span>
+    <span class="fa">→</span>
+    <span class="fs">LLMs + Tools</span>
+  </div>
+  <span class="slide-number">4</span>
+</div>
+
+<!-- ════════════ SLIDE 5: The SDK in 30 Seconds ════════════ -->
+<div class="slide">
+  <h2>The SDK in 30 Seconds</h2>
+
+  <pre><code><span class="kw">import</span> { spawn } <span class="kw">from</span> <span class="str">"node:child_process"</span>;
+<span class="kw">import</span> { Readable, Writable } <span class="kw">from</span> <span class="str">"node:stream"</span>;
+<span class="kw">import</span> { <span class="fn">ndJsonStream</span>, <span class="tp">PROTOCOL_VERSION</span> } <span class="kw">from</span> <span class="str">"@agentclientprotocol/sdk"</span>;
+<span class="kw">import</span> { <span class="tp">GooseClient</span> } <span class="kw">from</span> <span class="str">"@aaif/goose-sdk"</span>;
+<span class="kw">import</span> { <span class="fn">resolveGooseBinary</span> } <span class="kw">from</span> <span class="str">"@aaif/goose-sdk/node"</span>;
+
+<span class="cm">// 1. Spawn the goose binary</span>
+<span class="kw">const</span> proc = <span class="fn">spawn</span>(<span class="fn">resolveGooseBinary</span>(), [<span class="str">"acp"</span>], { stdio: [<span class="str">"pipe"</span>, <span class="str">"pipe"</span>, <span class="str">"ignore"</span>] });
+<span class="kw">const</span> stream = <span class="fn">ndJsonStream</span>(Writable.<span class="fn">toWeb</span>(proc.stdin!), Readable.<span class="fn">toWeb</span>(proc.stdout!));
+
+<span class="cm">// 2. Create the client</span>
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="tp">GooseClient</span>(() =&gt; ({
+  <span class="fn">sessionUpdate</span>: <span class="kw">async</span> (p) =&gt; {
+    <span class="kw">if</span> (p.update.sessionUpdate === <span class="str">"agent_message_chunk"</span> && p.update.content.type === <span class="str">"text"</span>)
+      process.stdout.<span class="fn">write</span>(p.update.content.text);  <span class="cm">// stream text to your UI</span>
+  },
+  <span class="fn">requestPermission</span>: <span class="kw">async</span> (p) =&gt; ({
+    outcome: { outcome: <span class="str">"selected"</span>, optionId: p.options[<span class="n">0</span>].optionId }  <span class="cm">// auto-approve</span>
+  }),
+}), stream);
+
+<span class="cm">// 3. Initialize, create session, prompt</span>
+<span class="kw">await</span> client.<span class="fn">initialize</span>({ protocolVersion: <span class="tp">PROTOCOL_VERSION</span>, clientInfo: { name: <span class="str">"my-app"</span>, version: <span class="str">"1.0"</span> }, clientCapabilities: {} });
+<span class="kw">const</span> session = <span class="kw">await</span> client.<span class="fn">newSession</span>({ cwd: <span class="str">"."</span>, mcpServers: [], _meta: { provider: <span class="str">"anthropic"</span> } });
+<span class="kw">await</span> client.<span class="fn">prompt</span>({ sessionId: session.sessionId, prompt: [{ type: <span class="str">"text"</span>, text: <span class="str">"Hello!"</span> }] });</code></pre>
+
+  <p style="margin-top: 0.75rem; text-align: center;">
+    That's it. You have a full agent with tool use, streaming, sessions, and any LLM provider.
+  </p>
+  <span class="slide-number">5</span>
+</div>
+
+<!-- ════════════ SLIDE 6: Three Clients ════════════ -->
+<div class="slide">
+  <h2>Three Clients, One SDK</h2>
+  <p style="margin-bottom: 1rem;">The same <code>GooseClient</code> + <code>@aaif/goose-sdk</code> powers all three:</p>
+
+  <div class="grid3">
+    <div class="card ca">
+      <h3>🖥️ goose2 Desktop</h3>
+      <p style="font-size: 0.95rem;"><strong>Tauri + React.</strong> Connects via WebSocket.</p>
+      <ul style="font-size: 0.9rem;">
+        <li>Singleton connection with auto-reconnect</li>
+        <li>Zustand stores for chat state</li>
+        <li>Replay + live streaming modes</li>
+        <li>Full session management UI</li>
+      </ul>
+      <pre><code><span class="kw">const</span> stream = <span class="fn">createWebSocketStream</span>(wsUrl);
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="tp">GooseClient</span>(cb, stream);</code></pre>
+    </div>
+    <div class="card cp">
+      <h3>⌨️ Text TUI</h3>
+      <p style="font-size: 0.95rem;"><strong>React Ink.</strong> Connects via stdio.</p>
+      <ul style="font-size: 0.9rem;">
+        <li>Spawns <code>goose acp</code> as child process</li>
+        <li>Interactive TUI + one-shot text mode</li>
+        <li>Provider onboarding flow</li>
+        <li>~30 lines for minimal client</li>
+      </ul>
+      <pre><code><span class="kw">const</span> stream = <span class="fn">ndJsonStream</span>(stdin, stdout);
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="tp">GooseClient</span>(cb, stream);</code></pre>
+    </div>
+    <div class="card cg">
+      <h3>👁️ goose_perception</h3>
+      <p style="font-size: 0.95rem;"><strong>Headless Node.js.</strong> Watches screen → updates wiki.</p>
+      <ul style="font-size: 0.9rem;">
+        <li>Multi-model: fast (OCR) + smart (synthesis)</li>
+        <li>Sends images via ContentBlock</li>
+        <li>Fresh sessions per task batch</li>
+        <li>Token usage tracking</li>
+      </ul>
+      <pre><code><span class="kw">await</span> client.<span class="fn">prompt</span>({ sessionId, prompt: [
+  { type: <span class="str">"text"</span>, text: <span class="str">"Transcribe"</span> },
+  { type: <span class="str">"image"</span>, data: b64, mimeType: <span class="str">"image/png"</span> },
+]});</code></pre>
+    </div>
+  </div>
+  <span class="slide-number">6</span>
+</div>
+
+<!-- ════════════ SLIDE 7: What's Inside ════════════ -->
+<div class="slide">
+  <h2>What's Inside the Binary</h2>
+
+  <div class="grid3">
+    <div class="card cg">
+      <h3>🔒 Security</h3>
+      <ul style="font-size: 0.9rem;">
+        <li><strong>Prompt injection detection</strong> — pattern + ML classifier</li>
+        <li><strong>Tool permissions</strong> — 4 modes: Auto, Approve, SmartApprove, Chat</li>
+        <li><strong>Malware checks</strong> — OSV database queries before installing extensions</li>
+        <li><strong>Egress/exfiltration detection</strong></li>
+        <li><strong>Extension sandboxing</strong></li>
+      </ul>
+    </div>
+    <div class="card ca">
+      <h3>🧠 Context & Sessions</h3>
+      <ul style="font-size: 0.9rem;">
+        <li><strong>Auto-compaction</strong> at 80% context window</li>
+        <li><strong>Token counting</strong> — tiktoken BPE, includes tool definitions</li>
+        <li><strong>Cost tracking</strong> — per-provider usage, cache-aware</li>
+        <li><strong>Session persistence</strong> — create, resume, fork, export</li>
+        <li><strong>Chat recall</strong> across sessions</li>
+      </ul>
+    </div>
+    <div class="card cp">
+      <h3>🤖 Agent Capabilities</h3>
+      <ul style="font-size: 0.9rem;">
+        <li><strong>Sub-agents</strong> — parallel child agents with isolated context</li>
+        <li><strong>Scheduling</strong> — background/recurring agent tasks</li>
+        <li><strong>Sandboxed code execution</strong> — Docker containers</li>
+        <li><strong>Tool loop detection</strong> — catches repetition</li>
+        <li><strong>Retry with backoff</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top: 0.5rem;">
+    <div class="card co">
+      <h3>🧩 Extensions & Skills</h3>
+      <ul style="font-size: 0.9rem;">
+        <li><strong>MCP + rMCP</strong> — local and remote tool servers, hot-loadable</li>
+        <li><strong>Skills</strong> — discoverable SKILL.md files (project + global)</li>
+        <li><strong>Recipes</strong> — declarative YAML agent configs, shareable, deeplink-able</li>
+        <li><strong>Lifecycle hooks</strong> <span class="badge" style="background:#3d2f1a;color:#ffa657;font-size:0.6rem;">WIP</span> — shell/HTTP at agent lifecycle points</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--red);">
+      <h3>📡 Model Access</h3>
+      <ul style="font-size: 0.9rem;">
+        <li><strong>Cloud</strong> — Anthropic, OpenAI, Bedrock, Databricks, xAI, Groq…</li>
+        <li><strong>Local</strong> — Ollama, llama.cpp, Candle</li>
+        <li><strong>Mesh</strong> — distributed model routing</li>
+        <li><strong>Claude Code</strong> — as a provider via ACP</li>
+        <li><strong>Observability</strong> — OpenTelemetry + Langfuse tracing</li>
+      </ul>
+    </div>
+  </div>
+  <span class="slide-number">7</span>
+</div>
+
+<!-- ════════════ SLIDE 8: Extension Points ════════════ -->
+<div class="slide">
+  <h2>Extension Points</h2>
+  <p style="margin-bottom: 1rem;">Ways to extend Goose without forking it:</p>
+
+  <div class="grid2">
+    <div class="card cg">
+      <h3>🧩 MCP + rMCP Extensions</h3>
+      <p style="font-size: 0.95rem;">Add tools at runtime via local or remote MCP servers.
+      Goose manages the lifecycle — hot-loadable, no restart.</p>
+      <pre><code><span class="kw">await</span> client.<span class="fn">extMethod</span>(
+  <span class="str">"_goose/extensions/add"</span>, {
+    sessionId,
+    name: <span class="str">"my-tool-server"</span>,
+    uri: <span class="str">"http://localhost:8080"</span>,
+  }
+);</code></pre>
+    </div>
+    <div class="card co">
+      <h3>🪝 Lifecycle Hooks <span class="badge" style="background:#3d2f1a;color:#ffa657;">WIP</span></h3>
+      <p style="font-size: 0.95rem;">Shell commands or HTTP calls at key agent lifecycle points.
+      Configured in YAML/JSON — no code changes.</p>
+      <ul style="font-size: 0.9rem;">
+        <li><strong>before_tool_call</strong> — block dangerous actions</li>
+        <li><strong>after_tool_call</strong> — audit, log, react</li>
+        <li><strong>post_compact</strong> — re-inject context after compaction</li>
+        <li><strong>on_session_start / end</strong> — setup / teardown</li>
+      </ul>
+      <p class="small" style="margin-top: 0.3rem;">
+        PRs: <a href="https://github.com/aaif-goose/goose/pull/8842" style="color:var(--accent);">#8842</a>,
+        <a href="https://github.com/aaif-goose/goose/pull/7411" style="color:var(--accent);">#7411</a>
+      </p>
+    </div>
+    <div class="card cp">
+      <h3>📚 Skills</h3>
+      <p style="font-size: 0.95rem;">Discoverable <code>SKILL.md</code> files with frontmatter. Project-scoped
+      (<code>.goose/skills/</code>) or global (<code>~/.agents/skills/</code>).
+      Procedural knowledge the agent loads on demand.</p>
+    </div>
+    <div class="card ca">
+      <h3>🍳 Recipes + Sub-Agents</h3>
+      <p style="font-size: 0.95rem;"><strong>Recipes:</strong> Declarative YAML — bundle prompt, extensions, model, parameters.
+      Shareable, deeplink-encodable, schedulable.</p>
+      <p style="font-size: 0.95rem; margin-top: 0.3rem;"><strong>Sub-agents:</strong> Spawn child agents with isolated contexts for parallel workstreams.</p>
+    </div>
+  </div>
+  <span class="slide-number">8</span>
+</div>
+
+<!-- ════════════ SLIDE 9: ACP → Standard ════════════ -->
+<div class="slide">
+  <h2>ACP+ → Open Standard</h2>
+  <p style="margin-bottom: 1rem;">
+    ACP is already an open protocol with shared infrastructure.
+    Goose's extensions (<code>_goose/*</code>) follow a path to standardisation:
+  </p>
+
+  <div class="flow" style="font-size: 1.1rem; margin-bottom: 1.5rem;">
+    <span class="fs" style="border-color: var(--orange);">1. Ship in Goose</span>
+    <span class="fa">→</span>
+    <span class="fs" style="border-color: var(--accent);">2. Validate with clients</span>
+    <span class="fa">→</span>
+    <span class="fs" style="border-color: var(--purple);">3. Propose to spec</span>
+    <span class="fa">→</span>
+    <span class="fs" style="border-color: var(--green);">4. Other agents adopt</span>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <h3 style="color: var(--green);">Shared Infrastructure Today</h3>
+      <ul>
+        <li><strong><code>@agentclientprotocol/sdk</code></strong> — TypeScript SDK (npm)</li>
+        <li><strong><code>sacp</code></strong> — Rust crate (symposium-acp)</li>
+        <li><strong><code>agent-client-protocol-schema</code></strong> — shared types (crates.io)</li>
+        <li>JSON Schema definitions for all request/response types</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color: var(--orange);">What Gets Standardised Next</h3>
+      <ul>
+        <li>Provider discovery & model listing</li>
+        <li>Extension management (add/remove/toggle)</li>
+        <li>Config & secret management</li>
+        <li>Session export/import</li>
+        <li>Lifecycle hooks</li>
+      </ul>
+      <p class="small" style="margin-top: 0.5rem;">
+        Battle-tested in production across 3+ clients before proposing.
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 1rem; text-align: center;">
+    <p>
+      The LSP playbook: one protocol, many clients, many agents.
+      Build for <code>GooseClient</code> today → works with any ACP agent tomorrow.
+    </p>
+  </div>
+  <span class="slide-number">9</span>
+</div>
+
+<!-- ════════════ SLIDE 10: Code — Desktop Pattern ════════════ -->
+<div class="slide">
+  <h2>Pattern: Desktop App (goose2)</h2>
+
+  <div class="two-col">
+    <div>
+      <pre><code><span class="cm">// Singleton connection with auto-reconnect</span>
+<span class="kw">let</span> client: <span class="tp">GooseClient</span> | <span class="kw">null</span> = <span class="kw">null</span>;
+
+<span class="kw">export async function</span> <span class="fn">getClient</span>() {
+  <span class="kw">if</span> (client) <span class="kw">return</span> client;
+
+  <span class="kw">const</span> wsUrl = <span class="kw">await</span> <span class="fn">invoke</span>(<span class="str">"get_goose_serve_url"</span>);
+  <span class="kw">const</span> stream = <span class="fn">createWebSocketStream</span>(wsUrl);
+
+  client = <span class="kw">new</span> <span class="tp">GooseClient</span>(() =&gt; ({
+    <span class="fn">sessionUpdate</span>: <span class="kw">async</span> (n) =&gt; {
+      notificationHandler.<span class="fn">handle</span>(n);
+    },
+    <span class="fn">requestPermission</span>: <span class="kw">async</span> (p) =&gt; ({
+      outcome: { outcome: <span class="str">"selected"</span>,
+        optionId: p.options[<span class="n">0</span>].optionId },
+    }),
+  }), stream);
+
+  <span class="kw">await</span> client.<span class="fn">initialize</span>({
+    protocolVersion: <span class="tp">PROTOCOL_VERSION</span>,
+    clientInfo: { name: <span class="str">"goose2"</span>, version: <span class="str">"0.1.0"</span> },
+    clientCapabilities: {},
+  });
+
+  <span class="cm">// Auto-reconnect on disconnect</span>
+  client.closed.<span class="fn">then</span>(() =&gt; { client = <span class="kw">null</span>; });
+  <span class="kw">return</span> client;
+}
+
+<span class="cm">// Clean API wrappers</span>
+<span class="kw">export const</span> <span class="fn">prompt</span> = (sid, blocks) =&gt;
+  <span class="fn">getClient</span>().<span class="fn">then</span>(c =&gt;
+    c.<span class="fn">prompt</span>({ sessionId: sid, prompt: blocks }));
+
+<span class="kw">export const</span> <span class="fn">setModel</span> = (sid, model) =&gt;
+  <span class="fn">getClient</span>().<span class="fn">then</span>(c =&gt;
+    c.<span class="fn">setSessionConfigOption</span>({
+      sessionId: sid,
+      configId: <span class="str">"model"</span>, value: model }));</code></pre>
+    </div>
+    <div>
+      <h3>What This Gets You</h3>
+      <ul>
+        <li><strong>Lazy connection</strong> — connects on first use</li>
+        <li><strong>Auto-reconnect</strong> — nulls client on WS close, next call reconnects</li>
+        <li><strong>All state in Zustand</strong> — notifications route to stores</li>
+        <li><strong>Session replay</strong> — <code>loadSession()</code> replays history via notifications</li>
+      </ul>
+
+      <h3 style="margin-top: 1.25rem;">Notification → UI</h3>
+      <pre><code><span class="cm">// Route to Zustand stores</span>
+<span class="kw">switch</span> (update.sessionUpdate) {
+  <span class="kw">case</span> <span class="str">"agent_message_chunk"</span>:
+    chatStore.<span class="fn">append</span>(sid, update.content);
+    <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="str">"tool_call"</span>:
+    chatStore.<span class="fn">addTool</span>(sid, update);
+    <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="str">"usage_update"</span>:
+    chatStore.<span class="fn">updateUsage</span>(sid, update);
+    <span class="kw">break</span>;
+}</code></pre>
+    </div>
+  </div>
+  <span class="slide-number">10</span>
+</div>
+
+<!-- ════════════ SLIDE 11: Code — Headless Pattern ════════════ -->
+<div class="slide">
+  <h2>Pattern: Headless Service (goose_perception)</h2>
+
+  <div class="two-col">
+    <div>
+      <pre><code><span class="cm">// Multi-model: cheap for OCR, expensive for synthesis</span>
+<span class="kw">async function</span> <span class="fn">createSession</span>(kind: <span class="str">"fast"</span>|<span class="str">"smart"</span>) {
+  <span class="kw">const</span> provider = kind === <span class="str">"fast"</span>
+    ? config.fastProvider : config.smartProvider;
+  <span class="kw">const</span> model = kind === <span class="str">"fast"</span>
+    ? config.fastModel : config.smartModel;
+
+  <span class="kw">const</span> s = <span class="kw">await</span> client.<span class="fn">newSession</span>({
+    cwd: wikiDir, mcpServers: [],
+    _meta: { provider },
+  });
+
+  <span class="kw">if</span> (model) <span class="kw">await</span> client.goose
+    .<span class="fn">GooseSessionProviderUpdate</span>({
+      sessionId: s.sessionId, provider, model,
+    });
+
+  <span class="kw">return</span> s.sessionId;
+}
+
+<span class="cm">// Send screenshot for transcription</span>
+<span class="kw">const</span> sid = <span class="kw">await</span> <span class="fn">createSession</span>(<span class="str">"fast"</span>);
+buf.length = <span class="n">0</span>;
+<span class="kw">await</span> client.<span class="fn">prompt</span>({ sessionId: sid, prompt: [
+  { type: <span class="str">"text"</span>, text: <span class="str">"Transcribe this screen"</span> },
+  { type: <span class="str">"image"</span>, data: screenshot.base64,
+    mimeType: <span class="str">"image/png"</span> },
+]});
+<span class="kw">const</span> result = buf.<span class="fn">join</span>(<span class="str">""</span>);</code></pre>
+    </div>
+    <div>
+      <h3>Key Patterns</h3>
+      <ul>
+        <li><strong>Session-per-task</strong> — fresh session for each batch, no context buildup</li>
+        <li><strong>Multi-model</strong> — different sessions with different providers/models</li>
+        <li><strong>Stream buffer</strong> — accumulate chunks, read after prompt completes</li>
+        <li><strong>Images as ContentBlock</strong> — base64 alongside text</li>
+      </ul>
+
+      <h3 style="margin-top: 1.25rem;">Query Providers at Runtime</h3>
+      <pre><code><span class="cm">// What providers are configured?</span>
+<span class="kw">const</span> providers = <span class="kw">await</span> client.goose
+  .<span class="fn">GooseProvidersDetails</span>({});
+providers.providers
+  .<span class="fn">filter</span>(p =&gt; p.isConfigured)
+  .<span class="fn">forEach</span>(p =&gt;
+    console.<span class="fn">log</span>(<span class="str">`${p.name}: ${p.displayName}`</span>));
+
+<span class="cm">// What models does a provider have?</span>
+<span class="kw">const</span> models = <span class="kw">await</span> client.goose
+  .<span class="fn">GooseProvidersModels</span>({
+    providerName: <span class="str">"anthropic"</span>
+  });</code></pre>
+    </div>
+  </div>
+  <span class="slide-number">11</span>
+</div>
+
+<!-- ════════════ SLIDE 12: Summary ════════════ -->
+<div class="slide">
+  <h2>Build on Goose</h2>
+
+  <div class="grid2" style="margin-bottom: 1.5rem;">
+    <div class="card ca">
+      <h3>📦 One Binary, Runs Anywhere</h3>
+      <p>Compiled Rust. Brew, npm, apt, rpm, Docker, Windows MSI, curl.
+      Runs as daemon, child process, or CLI.</p>
+    </div>
+    <div class="card cg">
+      <h3>🔒 Security Built In</h3>
+      <p>Prompt injection detection, tool permission modes, malware checks,
+      egress monitoring, sandboxed execution.</p>
+    </div>
+    <div class="card cp">
+      <h3>🧩 Extend, Don't Fork</h3>
+      <p>MCP + rMCP for tools. Skills for knowledge. Recipes for config.
+      Hooks for policy. Sub-agents for parallelism.</p>
+    </div>
+    <div class="card co">
+      <h3>📡 Open Protocol</h3>
+      <p>ACP is the standard. Goose's ACP+ extensions prove out in production, then get
+      standardised. Build once, work with any ACP agent.</p>
+    </div>
+  </div>
+
+  <div class="card" style="text-align: center;">
+    <p style="font-size: 1.2rem;">
+      <strong>3 clients prove it works. Your app could be the 4th.</strong>
+    </p>
+    <div class="flow" style="justify-content: center; margin-top: 0.5rem;">
+      <span class="fs"><strong>goose2</strong> Desktop</span>
+      <span class="fs"><strong>Text TUI</strong> Terminal</span>
+      <span class="fs"><strong>goose_perception</strong> Headless</span>
+    </div>
+    <pre style="display: inline-block; margin-top: 0.75rem;"><code>brew install block-goose-cli    # or npm, apt, docker, curl...</code></pre>
+  </div>
+  <span class="slide-number">12</span>
+</div>
+
+</body>
+</html>
