@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 720" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#8b949e"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#7ee787"/>
+    </marker>
+    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#58a6ff" flood-opacity="0.15"/>
+    </filter>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="1" dy="2" stdDeviation="4" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="720" fill="#0d1117"/>
+
+  <!-- ==================== API PANEL (Left) ==================== -->
+  <rect x="30" y="225" width="110" height="220" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="85" y="262" text-anchor="middle" font-size="18" font-weight="700" fill="#58a6ff">API</text>
+  <line x1="50" y1="274" x2="120" y2="274" stroke="#30363d" stroke-width="1"/>
+
+  <!-- Messages In -->
+  <text x="85" y="308" text-anchor="middle" font-size="10" fill="#8b949e" font-weight="500">messages in</text>
+  <line x1="140" y1="304" x2="200" y2="304" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow-accent)"/>
+
+  <!-- Messages Out -->
+  <text x="85" y="388" text-anchor="middle" font-size="10" fill="#8b949e" font-weight="500">messages out</text>
+  <line x1="200" y1="384" x2="140" y2="384" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow-accent)"/>
+
+  <!-- ==================== MAIN LOOP CIRCLE ==================== -->
+  <ellipse cx="370" cy="340" rx="165" ry="165" fill="#161b22" stroke="#58a6ff" stroke-width="2" filter="url(#glow)"/>
+
+  <!-- Internal horizontal dividers inside the circle -->
+  <line x1="230" y1="282" x2="510" y2="282" stroke="#30363d" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="220" y1="325" x2="520" y2="325" stroke="#30363d" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="220" y1="370" x2="520" y2="370" stroke="#30363d" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="230" y1="415" x2="510" y2="415" stroke="#30363d" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Circular arrow (loop indicator) at top of circle -->
+  <path d="M 330 178 A 40 40 0 1 1 410 178" fill="none" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="370" y="168" text-anchor="middle" font-size="9" fill="#8b949e" font-weight="500">loop</text>
+
+  <!-- ===== INFERENCE (top zone inside circle) ===== -->
+  <text x="370" y="222" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">Inference</text>
+  <text x="370" y="240" text-anchor="middle" font-size="10" fill="#8b949e">LLM generates response</text>
+
+  <!-- ===== TOOL CALL (second zone) ===== -->
+  <rect x="310" y="288" width="120" height="30" rx="6" fill="#2d1f00" stroke="#ffa657" stroke-width="1.2"/>
+  <text x="370" y="308" text-anchor="middle" font-size="12" font-weight="600" fill="#ffa657">Tool Call</text>
+
+  <!-- ===== TOOL RESPONSE (third zone) ===== -->
+  <rect x="310" y="335" width="120" height="30" rx="6" fill="#0d2818" stroke="#7ee787" stroke-width="1.2"/>
+  <text x="370" y="355" text-anchor="middle" font-size="12" font-weight="600" fill="#7ee787">Tool Response</text>
+
+  <!-- ===== STORAGE (bottom zone) ===== -->
+  <rect x="330" y="383" width="80" height="26" rx="6" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
+  <text x="370" y="401" text-anchor="middle" font-size="11" font-weight="500" fill="#e6edf3">Storage</text>
+
+  <!-- Loop arrow from storage back up to inference -->
+  <path d="M 340 410 C 260 450 240 250 340 217" fill="none" stroke="#8b949e" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+
+  <!-- ==================== HOOKS ==================== -->
+
+  <!-- (H) Pre-Inference Hook -->
+  <g transform="translate(215, 195)">
+    <circle cx="0" cy="0" r="11" fill="#2d1520" stroke="#d2a8ff" stroke-width="1.5"/>
+    <text x="0" y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#d2a8ff">H</text>
+    <text x="18" y="4" font-size="9" fill="#8b949e" font-weight="500">pre-inference</text>
+  </g>
+  <line x1="225" y1="206" x2="310" y2="225" stroke="#d2a8ff" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- (H) Pre-Tool Hook -->
+  <g transform="translate(255, 298)">
+    <circle cx="0" cy="0" r="11" fill="#2d1520" stroke="#d2a8ff" stroke-width="1.5"/>
+    <text x="0" y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#d2a8ff">H</text>
+    <text x="-52" y="4" text-anchor="end" font-size="9" fill="#8b949e" font-weight="500">pre-tool</text>
+  </g>
+
+  <!-- (H) Post-Tool Hook -->
+  <g transform="translate(255, 348)">
+    <circle cx="0" cy="0" r="11" fill="#2d1520" stroke="#d2a8ff" stroke-width="1.5"/>
+    <text x="0" y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#d2a8ff">H</text>
+    <text x="-52" y="4" text-anchor="end" font-size="9" fill="#8b949e" font-weight="500">post-tool</text>
+  </g>
+
+  <!-- (H) Post-Response Hook -->
+  <g transform="translate(255, 398)">
+    <circle cx="0" cy="0" r="11" fill="#2d1520" stroke="#d2a8ff" stroke-width="1.5"/>
+    <text x="0" y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#d2a8ff">H</text>
+    <text x="-52" y="4" text-anchor="end" font-size="9" fill="#8b949e" font-weight="500">post-response</text>
+  </g>
+
+  <!-- ==================== TOOL EXECUTION (Right) ==================== -->
+  <!-- Arrow from Tool Call to Tool Execution -->
+  <line x1="430" y1="303" x2="570" y2="303" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="500" y="295" text-anchor="middle" font-size="9" fill="#8b949e">execute</text>
+
+  <!-- Tool Execution Box -->
+  <rect x="575" y="228" width="180" height="155" rx="12" fill="#161b22" stroke="#ffa657" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="665" y="258" text-anchor="middle" font-size="14" font-weight="700" fill="#ffa657">Tool Execution</text>
+  <line x1="595" y1="268" x2="735" y2="268" stroke="#30363d" stroke-width="1"/>
+
+  <!-- Three execution modes -->
+  <g transform="translate(610, 282)">
+    <rect x="0" y="0" width="120" height="26" rx="5" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+    <circle cx="14" cy="13" r="4" fill="#ffa657"/>
+    <text x="26" y="17" font-size="11" fill="#e6edf3">In-Process</text>
+  </g>
+  <g transform="translate(610, 314)">
+    <rect x="0" y="0" width="120" height="26" rx="5" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+    <circle cx="14" cy="13" r="4" fill="#58a6ff"/>
+    <text x="26" y="17" font-size="11" fill="#e6edf3">On-Device</text>
+  </g>
+  <g transform="translate(610, 346)">
+    <rect x="0" y="0" width="120" height="26" rx="5" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+    <circle cx="14" cy="13" r="4" fill="#ff7b72"/>
+    <text x="26" y="17" font-size="11" fill="#e6edf3">Over Network</text>
+  </g>
+
+  <!-- Arrow from Tool Execution back to Tool Response -->
+  <path d="M 665 383 L 665 425 Q 665 440 650 440 L 440 440 Q 425 440 425 425 L 425 365" fill="none" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="560" y="452" text-anchor="middle" font-size="9" fill="#8b949e">response</text>
+
+  <!-- ==================== CONTEXT MANAGEMENT (Bottom) ==================== -->
+  <line x1="370" y1="505" x2="370" y2="550" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="255" y="555" width="230" height="100" rx="12" fill="#161b22" stroke="#7ee787" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="370" y="583" text-anchor="middle" font-size="14" font-weight="700" fill="#7ee787">Context Management</text>
+  <line x1="275" y1="593" x2="465" y2="593" stroke="#30363d" stroke-width="1"/>
+
+  <g transform="translate(285, 607)">
+    <rect x="0" y="0" width="90" height="26" rx="5" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+    <text x="45" y="17" text-anchor="middle" font-size="10" fill="#7ee787">Summarize</text>
+  </g>
+  <g transform="translate(390, 607)">
+    <rect x="0" y="0" width="75" height="26" rx="5" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+    <text x="37" y="17" text-anchor="middle" font-size="10" fill="#7ee787">Redact</text>
+  </g>
+
+  <!-- ==================== HOOKS LEGEND (Bottom Right) ==================== -->
+  <g transform="translate(575, 570)">
+    <rect x="0" y="0" width="220" height="65" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+    <circle cx="24" cy="24" r="11" fill="#2d1520" stroke="#d2a8ff" stroke-width="1.5"/>
+    <text x="24" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#d2a8ff">H</text>
+    <text x="42" y="22" font-size="11" font-weight="600" fill="#d2a8ff">= Hook</text>
+    <text x="42" y="38" font-size="10" fill="#8b949e">Delegated to application layer</text>
+    <text x="42" y="52" font-size="10" fill="#8b949e">for custom behavior</text>
+  </g>
+
+  <!-- ==================== NOTES (Top Right) ==================== -->
+  <g transform="translate(580, 80)">
+    <rect x="0" y="0" width="220" height="115" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1" filter="url(#shadow)"/>
+    <text x="15" y="26" font-size="11" font-weight="600" fill="#58a6ff">Goals</text>
+    <line x1="15" y1="34" x2="205" y2="34" stroke="#30363d" stroke-width="1"/>
+    <circle cx="22" cy="54" r="3" fill="#58a6ff"/>
+    <text x="32" y="58" font-size="10" fill="#e6edf3">Reference implementation</text>
+    <circle cx="22" cy="74" r="3" fill="#58a6ff"/>
+    <text x="32" y="78" font-size="10" fill="#e6edf3">Local model support</text>
+    <circle cx="22" cy="94" r="3" fill="#58a6ff"/>
+    <text x="32" y="98" font-size="10" fill="#e6edf3">Label / distribution support</text>
+  </g>
+
+  <!-- ==================== FLOW NUMBERS ==================== -->
+  <circle cx="170" cy="304" r="11" fill="#58a6ff"/>
+  <text x="170" y="308" text-anchor="middle" font-size="9" font-weight="700" fill="#0d1117">1</text>
+
+  <circle cx="370" cy="262" r="11" fill="#58a6ff"/>
+  <text x="370" y="266" text-anchor="middle" font-size="9" font-weight="700" fill="#0d1117">2</text>
+
+  <circle cx="555" cy="303" r="11" fill="#58a6ff"/>
+  <text x="555" y="307" text-anchor="middle" font-size="9" font-weight="700" fill="#0d1117">3</text>
+
+  <circle cx="460" cy="440" r="11" fill="#58a6ff"/>
+  <text x="460" y="444" text-anchor="middle" font-size="9" font-weight="700" fill="#0d1117">4</text>
+
+  <circle cx="370" cy="530" r="11" fill="#58a6ff"/>
+  <text x="370" y="534" text-anchor="middle" font-size="9" font-weight="700" fill="#0d1117">5</text>
+
+  <circle cx="170" cy="384" r="11" fill="#58a6ff"/>
+  <text x="170" y="388" text-anchor="middle" font-size="9" font-weight="700" fill="#0d1117">6</text>
+
+</svg>

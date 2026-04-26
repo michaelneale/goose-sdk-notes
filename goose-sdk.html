@@ -176,7 +176,17 @@
   <span class="slide-number">3</span>
 </div>
 
-<!-- ════════════ SLIDE 4: How It Works ════════════ -->
+<!-- ════════════ SLIDE 4: The Agent Loop ════════════ -->
+<div class="slide">
+  <h2>The Agent Loop</h2>
+  <img src="agentloop.svg" alt="Agent loop: inference → tool call → tool execution → tool response → context management, with hooks at each stage" class="diagram-img" style="max-height: 520px;">
+  <p class="small" style="text-align: center; margin-top: 0.75rem;">
+    The core loop: inference → tool call → execute → respond → repeat. Hooks let the application layer intercept at every stage.
+  </p>
+  <span class="slide-number">4</span>
+</div>
+
+<!-- ════════════ SLIDE 5: How It Works ════════════ -->
 <div class="slide">
   <h2>How It Works</h2>
 
@@ -232,10 +242,10 @@
     <span class="fa">→</span>
     <span class="fs">LLMs + Tools</span>
   </div>
-  <span class="slide-number">4</span>
+  <span class="slide-number">5</span>
 </div>
 
-<!-- ════════════ SLIDE 5: The SDK in 30 Seconds ════════════ -->
+<!-- ════════════ SLIDE 6: The SDK in 30 Seconds ════════════ -->
 <div class="slide">
   <h2>The SDK in 30 Seconds</h2>
 
@@ -268,10 +278,10 @@
   <p style="margin-top: 0.75rem; text-align: center;">
     That's it. You have a full agent with tool use, streaming, sessions, and any LLM provider.
   </p>
-  <span class="slide-number">5</span>
+  <span class="slide-number">6</span>
 </div>
 
-<!-- ════════════ SLIDE 6: Three Clients ════════════ -->
+<!-- ════════════ SLIDE 7: Three Clients ════════════ -->
 <div class="slide">
   <h2>Three Clients, One SDK</h2>
   <p style="margin-bottom: 1rem;">The same <code>GooseClient</code> + <code>@aaif/goose-sdk</code> powers all three:</p>
@@ -316,10 +326,10 @@
 ]});</code></pre>
     </div>
   </div>
-  <span class="slide-number">6</span>
+  <span class="slide-number">7</span>
 </div>
 
-<!-- ════════════ SLIDE 7: What's Inside ════════════ -->
+<!-- ════════════ SLIDE 8: What's Inside ════════════ -->
 <div class="slide">
   <h2>What's Inside the Binary</h2>
 
@@ -377,10 +387,10 @@
       </ul>
     </div>
   </div>
-  <span class="slide-number">7</span>
+  <span class="slide-number">8</span>
 </div>
 
-<!-- ════════════ SLIDE 8: Extension Points ════════════ -->
+<!-- ════════════ SLIDE 9: Extension Points ════════════ -->
 <div class="slide">
   <h2>Extension Points</h2>
   <p style="margin-bottom: 1rem;">Ways to extend Goose without forking it:</p>
@@ -426,10 +436,10 @@
       <p style="font-size: 0.95rem; margin-top: 0.3rem;"><strong>Sub-agents:</strong> Spawn child agents with isolated contexts for parallel workstreams.</p>
     </div>
   </div>
-  <span class="slide-number">8</span>
+  <span class="slide-number">9</span>
 </div>
 
-<!-- ════════════ SLIDE 9: Plays Nice ════════════ -->
+<!-- ════════════ SLIDE 10: Plays Nice ════════════ -->
 <div class="slide">
   <h2>Plays Nice With Other Agents</h2>
   <p style="margin-bottom: 1rem;">
@@ -470,7 +480,7 @@
   <span class="slide-number">10</span>
 </div>
 
-<!-- ════════════ SLIDE 10: ACP → Standard ════════════ -->
+<!-- ════════════ SLIDE 11: ACP → Standard ════════════ -->
 <div class="slide">
   <h2>ACP+ → Open Standard</h2>
   <p style="margin-bottom: 1rem;">
@@ -519,10 +529,10 @@
       Build for <code>GooseClient</code> today → works with any ACP agent tomorrow.
     </p>
   </div>
-  <span class="slide-number">9</span>
+  <span class="slide-number">11</span>
 </div>
 
-<!-- ════════════ SLIDE 11: Code — Desktop Pattern ════════════ -->
+<!-- ════════════ SLIDE 12: Code — Desktop Pattern ════════════ -->
 <div class="slide">
   <h2>Pattern: Desktop App (goose2)</h2>
 
@@ -593,10 +603,10 @@
 }</code></pre>
     </div>
   </div>
-  <span class="slide-number">11</span>
+  <span class="slide-number">12</span>
 </div>
 
-<!-- ════════════ SLIDE 12: Code — Headless Pattern ════════════ -->
+<!-- ════════════ SLIDE 13: Code — Headless Pattern ════════════ -->
 <div class="slide">
   <h2>Pattern: Headless Service (goose_perception)</h2>
 
@@ -657,10 +667,10 @@ providers.providers
   });</code></pre>
     </div>
   </div>
-  <span class="slide-number">12</span>
+  <span class="slide-number">13</span>
 </div>
 
-<!-- ════════════ SLIDE 13: Summary ════════════ -->
+<!-- ════════════ SLIDE 14: Summary ════════════ -->
 <div class="slide">
   <h2>Build on Goose</h2>
 
@@ -698,7 +708,7 @@ providers.providers
     </div>
     <pre style="display: inline-block; margin-top: 0.75rem;"><code>brew install block-goose-cli    # or npm, apt, docker, curl...</code></pre>
   </div>
-  <span class="slide-number">13</span>
+  <span class="slide-number">14</span>
 </div>
 
 </body>
